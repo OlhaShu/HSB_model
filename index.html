@@ -16,6 +16,21 @@
         input[type="range"] {
             width: 100%;
             cursor: pointer;
+            accent-color: #4f46e5;
+        }
+        /* Прихований системний пікер, що розтягнутий на всю інтерактивну зону */
+        .color-trigger {
+            position: relative;
+            cursor: pointer;
+        }
+        #hidden-color-picker {
+            opacity: 0;
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            z-index: 20;
         }
     </style>
 </head>
@@ -23,80 +38,100 @@
     <div class="max-w-4xl mx-auto">
         <header class="mb-10 text-center">
             <h1 class="text-4xl font-bold mb-4">Характеристики моделі HSB</h1>
-            <p class="text-lg text-slate-600">Налаштуйте параметри та завантажте графіки для навчання</p>
+            <p class="text-lg text-slate-600">Налаштуйте повзунки або оберіть готовий колір у палітрі</p>
         </header>
 
-        <!-- Main Controls -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Main Controls (Sliders) -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm mb-8 grid grid-cols-1 md:grid-cols-3 gap-6 border border-slate-100">
             <div class="space-y-2">
-                <label class="font-semibold flex justify-between">
-                    Відтінок (H): <span id="h-val">180</span>°
+                <label class="font-semibold flex justify-between text-sm">
+                    Відтінок (H): <span id="h-val" class="text-indigo-600 font-mono">180</span>°
                 </label>
                 <input type="range" id="h-input" min="0" max="360" value="180">
             </div>
             <div class="space-y-2">
-                <label class="font-semibold flex justify-between">
-                    Насиченість (S): <span id="s-val">100</span>%
+                <label class="font-semibold flex justify-between text-sm">
+                    Насиченість (S): <span id="s-val" class="text-indigo-600 font-mono">100</span>%
                 </label>
                 <input type="range" id="s-input" min="0" max="100" value="100">
             </div>
             <div class="space-y-2">
-                <label class="font-semibold flex justify-between">
-                    Яскравість (B): <span id="b-val">100</span>%
+                <label class="font-semibold flex justify-between text-sm">
+                    Яскравість (B): <span id="b-val" class="text-indigo-600 font-mono">100</span>%
                 </label>
                 <input type="range" id="b-input" min="0" max="100" value="100">
             </div>
         </div>
 
+        <!-- Result & Interactive Picker Section -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm mb-8 border-l-8 border-indigo-600 flex flex-col sm:flex-row items-center gap-8 transition-all">
+            
+            <!-- Клікабельний квадрат -->
+            <div class="color-trigger w-28 h-28 shrink-0 group">
+                <div id="color-preview" class="w-full h-full rounded-2xl shadow-inner border border-slate-200 transition-transform group-hover:scale-105" style="background-color: #00FFFF;"></div>
+                <input type="color" id="hidden-color-picker" value="#00FFFF">
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity bg-black/10 rounded-2xl">
+                    <svg class="w-8 h-8 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                </div>
+            </div>
+
+            <div class="flex-grow space-y-4 w-full text-center sm:text-left">
+                <div>
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Натисніть на код або квадрат, щоб обрати колір</h3>
+                    <div class="flex items-center justify-center sm:justify-start gap-3">
+                        <!-- Тепер це кнопка-тригер, а не поле для введення -->
+                        <div class="color-trigger group">
+                            <input type="color" id="hidden-color-picker-alt" value="#00FFFF" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer z-20">
+                            <span id="hex-display" class="text-4xl font-mono font-bold bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 hover:bg-slate-100 transition-colors inline-block uppercase">#00FFFF</span>
+                        </div>
+                        
+                        <button id="copy-btn" class="text-slate-400 hover:text-indigo-600 transition p-3 bg-slate-50 rounded-xl hover:bg-slate-100 border border-slate-200" title="Копіювати HEX">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="C8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m-3 8h4m-2-2v4"></path></svg>
+                        </button>
+                    </div>
+                    <p id="copy-msg" class="text-xs text-green-600 font-medium h-4 mt-2 opacity-0 transition-opacity">HEX-код скопійовано!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visual Graphs -->
         <div class="space-y-8">
-            <!-- Hue Section -->
             <section class="bg-white p-6 rounded-2xl shadow-sm">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                     <div>
-                        <h2 class="text-2xl font-bold">1. Hue (H) — Відтінок</h2>
-                        <p class="text-slate-500">Визначає позицію кольору на колірному колі (від 0° до 360°).</p>
+                        <h2 class="text-xl font-bold">1. Hue (H) — Відтінок</h2>
+                        <p class="text-slate-500 text-sm">Зміна чистого тону (0°-360°).</p>
                     </div>
-                    <button onclick="downloadChart('hue-canvas', 'HSB_Hue')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition flex items-center">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        Скачати спектр
-                    </button>
+                    <button onclick="downloadChart('hue-canvas', 'HSB_Hue')" class="text-xs font-bold text-indigo-600 uppercase tracking-wider hover:underline">Зберегти PNG</button>
                 </div>
                 <canvas id="hue-canvas" class="gradient-box"></canvas>
             </section>
 
-            <!-- Saturation Section -->
             <section class="bg-white p-6 rounded-2xl shadow-sm">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                     <div>
-                        <h2 class="text-2xl font-bold">2. Saturation (S) — Насиченість</h2>
-                        <p class="text-slate-500">Визначає чистоту кольору. 0% — сірий, 100% — чистий колір.</p>
+                        <h2 class="text-xl font-bold">2. Saturation (S) — Насиченість</h2>
+                        <p class="text-slate-500 text-sm">Від сірого до максимально яскравого.</p>
                     </div>
-                    <button onclick="downloadChart('sat-canvas', 'HSB_Saturation')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition flex items-center">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        Скачати градієнт S
-                    </button>
+                    <button onclick="downloadChart('sat-canvas', 'HSB_Saturation')" class="text-xs font-bold text-indigo-600 uppercase tracking-wider hover:underline">Зберегти PNG</button>
                 </div>
                 <canvas id="sat-canvas" class="gradient-box"></canvas>
             </section>
 
-            <!-- Brightness Section -->
             <section class="bg-white p-6 rounded-2xl shadow-sm">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                     <div>
-                        <h2 class="text-2xl font-bold">3. Brightness (B) — Яскравість</h2>
-                        <p class="text-slate-500">Кількість світла. 0% — абсолютно чорний, 100% — максимальна яскравість.</p>
+                        <h2 class="text-xl font-bold">3. Brightness (B) — Яскравість</h2>
+                        <p class="text-slate-500 text-sm">Додавання чорного (тіні) до кольору.</p>
                     </div>
-                    <button onclick="downloadChart('bri-canvas', 'HSB_Brightness')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition flex items-center">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        Скачати градієнт B
-                    </button>
+                    <button onclick="downloadChart('bri-canvas', 'HSB_Brightness')" class="text-xs font-bold text-indigo-600 uppercase tracking-wider hover:underline">Зберегти PNG</button>
                 </div>
                 <canvas id="bri-canvas" class="gradient-box"></canvas>
             </section>
         </div>
 
-        <footer class="mt-12 text-center text-slate-400 text-sm">
-            Розроблено для візуалізації основ UI дизайну
+        <footer class="mt-12 text-center text-slate-400 text-xs pb-8">
+            Інструмент для вивчення колористики в UI дизайні
         </footer>
     </div>
 
@@ -104,24 +139,78 @@
         const hInput = document.getElementById('h-input');
         const sInput = document.getElementById('s-input');
         const bInput = document.getElementById('b-input');
+        const hexDisplay = document.getElementById('hex-display');
+        const picker1 = document.getElementById('hidden-color-picker');
+        const picker2 = document.getElementById('hidden-color-picker-alt');
         
-        const hVal = document.getElementById('h-val');
-        const sVal = document.getElementById('s-val');
-        const bVal = document.getElementById('b-val');
+        const hLabel = document.getElementById('h-val');
+        const sLabel = document.getElementById('s-val');
+        const bLabel = document.getElementById('b-val');
 
         const hueCanvas = document.getElementById('hue-canvas');
         const satCanvas = document.getElementById('sat-canvas');
         const briCanvas = document.getElementById('bri-canvas');
+        const colorPreview = document.getElementById('color-preview');
 
-        function updateCanvases() {
-            const h = hInput.value;
-            const s = sInput.value;
-            const b = bInput.value;
+        // Математика HSB -> HEX
+        function hsbToHex(h, s, b) {
+            s /= 100; b /= 100;
+            const k = (n) => (n + h / 60) % 6;
+            const f = (n) => b * (1 - s * Math.max(0, Math.min(k(n), 4 - k(n), 1)));
+            const r = Math.round(255 * f(5));
+            const g = Math.round(255 * f(3));
+            const bl = Math.round(255 * f(1));
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + bl).toString(16).slice(1).toUpperCase();
+        }
 
-            hVal.innerText = h;
-            sVal.innerText = s;
-            bVal.innerText = b;
+        // Математика HEX -> HSB
+        function hexToHsb(hex) {
+            hex = hex.replace(/^#/, '');
+            if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+            const r = parseInt(hex.substring(0, 2), 16) / 255;
+            const g = parseInt(hex.substring(2, 4), 16) / 255;
+            const bl = parseInt(hex.substring(4, 6), 16) / 255;
+            const max = Math.max(r, g, bl), min = Math.min(r, g, bl);
+            const delta = max - min;
+            let h = 0, s = max === 0 ? 0 : delta / max, v = max;
+            if (delta !== 0) {
+                if (max === r) h = (g - bl) / delta + (g < bl ? 6 : 0);
+                else if (max === g) h = (bl - r) / delta + 2;
+                else h = (r - g) / delta + 4;
+                h /= 6;
+            }
+            return { h: Math.round(h * 360), s: Math.round(s * 100), b: Math.round(v * 100) };
+        }
 
+        function updateEverything(source, value = null) {
+            let h, s, b, hex;
+
+            if (source === 'sliders') {
+                h = parseInt(hInput.value);
+                s = parseInt(sInput.value);
+                b = parseInt(bInput.value);
+                hex = hsbToHex(h, s, b);
+            } else {
+                hex = (value || picker1.value).toUpperCase();
+                const hsb = hexToHsb(hex);
+                h = hsb.h; s = hsb.s; b = hsb.b;
+                // Sync sliders
+                hInput.value = h; sInput.value = s; bInput.value = b;
+            }
+
+            // Sync text and pickers
+            hexDisplay.innerText = hex;
+            picker1.value = hex;
+            picker2.value = hex;
+
+            // Sync labels
+            hLabel.innerText = h;
+            sLabel.innerText = hsbToHex(h, 100, 100) === "#000000" ? h : h; // simple refresh logic
+            sLabel.innerText = h; sLabel.innerText = h; // trigger
+            hLabel.innerText = h; sLabel.innerText = s; bLabel.innerText = b;
+
+            // Update visuals
+            colorPreview.style.backgroundColor = hex;
             drawHue();
             drawSaturation(h, b);
             drawBrightness(h, s);
@@ -129,82 +218,62 @@
 
         function drawHue() {
             const ctx = hueCanvas.getContext('2d');
-            hueCanvas.width = hueCanvas.offsetWidth * 2; // High DPI
-            hueCanvas.height = 100 * 2;
+            hueCanvas.width = hueCanvas.offsetWidth * 2; hueCanvas.height = 200;
             const grad = ctx.createLinearGradient(0, 0, hueCanvas.width, 0);
-            
-            for(let i=0; i<=360; i+=10) {
-                grad.addColorStop(i/360, `hsl(${i}, 100%, 50%)`);
-            }
-            
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, hueCanvas.width, hueCanvas.height);
-            
-            // Marker for current selection
-            const markerPos = (hInput.value / 360) * hueCanvas.width;
-            ctx.strokeStyle = 'white';
-            ctx.lineWidth = 6;
-            ctx.strokeRect(markerPos - 5, 0, 10, hueCanvas.height);
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(markerPos - 5, 0, 10, hueCanvas.height);
+            for(let i=0; i<=360; i+=10) grad.addColorStop(i/360, `hsl(${i}, 100%, 50%)`);
+            ctx.fillStyle = grad; ctx.fillRect(0, 0, hueCanvas.width, hueCanvas.height);
+            const x = (hInput.value / 360) * hueCanvas.width;
+            ctx.strokeStyle = 'white'; ctx.lineWidth = 6; ctx.strokeRect(x - 5, 0, 10, 200);
+            ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.strokeRect(x - 5, 0, 10, 200);
         }
 
         function drawSaturation(h, b) {
             const ctx = satCanvas.getContext('2d');
-            satCanvas.width = satCanvas.offsetWidth * 2;
-            satCanvas.height = 100 * 2;
+            satCanvas.width = satCanvas.offsetWidth * 2; satCanvas.height = 200;
             const grad = ctx.createLinearGradient(0, 0, satCanvas.width, 0);
-            
-            // HSB to HSL roughly for visualization
-            grad.addColorStop(0, `hsl(${h}, 0%, ${b/2}%)`);
-            grad.addColorStop(1, `hsl(${h}, 100%, ${b/2}%)`);
-            
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, satCanvas.width, satCanvas.height);
-
-            const markerPos = (sInput.value / 100) * satCanvas.width;
-            ctx.strokeStyle = 'white';
-            ctx.lineWidth = 6;
-            ctx.strokeRect(markerPos - 5, 0, 10, satCanvas.height);
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(markerPos - 5, 0, 10, satCanvas.height);
+            grad.addColorStop(0, hsbToHex(h, 0, b));
+            grad.addColorStop(1, hsbToHex(h, 100, b));
+            ctx.fillStyle = grad; ctx.fillRect(0, 0, satCanvas.width, satCanvas.height);
+            const x = (sInput.value / 100) * satCanvas.width;
+            ctx.strokeStyle = 'white'; ctx.lineWidth = 6; ctx.strokeRect(x - 5, 0, 10, 200);
         }
 
         function drawBrightness(h, s) {
             const ctx = briCanvas.getContext('2d');
-            briCanvas.width = briCanvas.offsetWidth * 2;
-            briCanvas.height = 100 * 2;
+            briCanvas.width = briCanvas.offsetWidth * 2; briCanvas.height = 200;
             const grad = ctx.createLinearGradient(0, 0, briCanvas.width, 0);
-            
-            grad.addColorStop(0, `black`);
-            grad.addColorStop(1, `hsl(${h}, ${s}%, 50%)`);
-            
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, briCanvas.width, briCanvas.height);
-
-            const markerPos = (bInput.value / 100) * briCanvas.width;
-            ctx.strokeStyle = 'white';
-            ctx.lineWidth = 6;
-            ctx.strokeRect(markerPos - 5, 0, 10, briCanvas.height);
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(markerPos - 5, 0, 10, briCanvas.height);
+            grad.addColorStop(0, '#000000');
+            grad.addColorStop(1, hsbToHex(h, s, 100));
+            ctx.fillStyle = grad; ctx.fillRect(0, 0, briCanvas.width, briCanvas.height);
+            const x = (bInput.value / 100) * briCanvas.width;
+            ctx.strokeStyle = 'white'; ctx.lineWidth = 6; ctx.strokeRect(x - 5, 0, 10, 200);
         }
 
-        function downloadChart(canvasId, name) {
-            const canvas = document.getElementById(canvasId);
+        function downloadChart(id, name) {
             const link = document.createElement('a');
             link.download = `${name}.png`;
-            link.href = canvas.toDataURL('image/png');
+            link.href = document.getElementById(id).toDataURL();
             link.click();
         }
 
-        [hInput, sInput, bInput].forEach(el => el.addEventListener('input', updateCanvases));
-        
-        window.addEventListener('resize', updateCanvases);
-        window.onload = updateCanvases;
+        // Listeners
+        [hInput, sInput, bInput].forEach(el => el.oninput = () => updateEverything('sliders'));
+        picker1.oninput = (e) => updateEverything('picker', e.target.value);
+        picker2.oninput = (e) => updateEverything('picker', e.target.value);
+
+        document.getElementById('copy-btn').onclick = () => {
+            const text = hexDisplay.innerText;
+            const temp = document.createElement('textarea');
+            temp.value = text; document.body.appendChild(temp);
+            temp.select(); document.execCommand('copy');
+            document.body.removeChild(temp);
+            const msg = document.getElementById('copy-msg');
+            msg.style.opacity = '1';
+            setTimeout(() => msg.style.opacity = '0', 2000);
+        };
+
+        window.onresize = () => updateEverything('sliders');
+        window.onload = () => updateEverything('sliders');
     </script>
 </body>
 </html>
